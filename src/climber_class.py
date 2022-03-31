@@ -1,5 +1,6 @@
 import pandas as pd
 import climb_jor
+import grades_class
 
 class climber():
     '''
@@ -10,9 +11,11 @@ class climber():
     num_clusters = 9
      
     def __init__(self, name = None, grade = 54, grade_range = 2,
-                 location = ['esp', 'montserrat', 'agulla del senglar'], height = 170, sex = 0):
+                 location = ['esp', 'montserrat', 'agulla del senglar'], 
+                 height = 170,cluster = [0,0,0,0,0,0,0,0,0]):
         
         print("Climber class initialized")
+        self.gr = grades_class.grades()
         
         self.routes_liked = pd.DataFrame()     
         self.routes_indifferent = pd.DataFrame() 
@@ -27,30 +30,35 @@ class climber():
         
         self.add_climber()
         
-        self.grade = grade
+        if isinstance(grade, str):
+            self.grade = self.gr.get_grade_id(grade)
+        else:
+            self.grade = grade      
+        
+        
         self.location = location # location = [country,crag,sector]
-        self.cluster = [0,0,0,0,0,0,0,0,0] # its cluster 0 by default
+        self.cluster = cluster # its cluster 0 by default
         self.height = height
-        self.sex = sex
         self.grade_range = grade_range    
     
     @classmethod    
     def add_climber(cls):
         cls.climber_count = cls.climber_count + 1
                 
-    def set_attributes(self, name = None, grade = None, cluster = None, location = None, height = None, sex = None, grade_range = None):
+    def set_attributes(self, name = None, grade = None, cluster = None, location = None, height = None, grade_range = None):
         if name != None:
             self.name = name
         if grade != None:            
-            self.grade = grade
+            if isinstance(grade, str):
+                self.grade = gr.get_grade_id(grade)
+            else:
+                self.grade = grade  
         if cluster != None:            
             self.cluster = cluster
         if location != None:
             self.location = location # location = [country,crag,sector]
         if height != None:
-            self.height = height
-        if sex != None:           
-            self.sex = sex   
+            self.height = height  
         if grade_range != None:
             self.grade_range = grade_range
 
@@ -66,14 +74,20 @@ class climber():
             self.cluster[cluster_num] = self.cluster[cluster_num] + like    
             
     def add_route(self,routes):
-        self.routes_indifferent = pd.concat([self.routes_indifferent, routes])
+        rt = routes.copy()
+        rt['liked'] = 'N/A'
+        self.routes_indifferent = pd.concat([self.routes_indifferent, rt])
                 
     def add_route_liked(self,routes):
-        self.routes_liked = pd.concat([self.routes_liked, routes])
+        rt = routes.copy()
+        rt['liked'] = 'Yes'
+        self.routes_liked = pd.concat([self.routes_liked, rt])
         self.add_cluster(routes.cluster,1)
        
     def add_route_not_liked(self,routes):
-        self.routes_not_liked = pd.concat([self.routes_not_liked, routes])
+        rt = routes.copy()
+        rt['liked'] = 'No'
+        self.routes_not_liked = pd.concat([self.routes_not_liked, rt])
         self.add_cluster(routes.cluster,-1)
         
     def clear_routes(self):
@@ -85,9 +99,11 @@ class climber():
 # -------------- Get methods ---------------        
                 
     def get_data(self):
-        return pd.DataFrame({'climber_id':self.climber_id,'name':self.name,'grade':self.grade,'grade_range':self.grade_range,
-                             'country':self.location[0],'crag':self.location[1],'sector':self.location[2],'height':self.height,
-                             'sex':self.sex}, index=[0])
+        return pd.DataFrame({'climber_id':self.climber_id,'name':self.name,
+                             'grade_fra':self.gr.get_fra(self.grade),'grade':self.grade,
+                             'grade_range':self.grade_range,'country':self.location[0],
+                             'crag':self.location[1],'sector':self.location[2],
+                             'height':self.height}, index=[0])
 
     def get_cluster_order(self):
         # Rearrange this list to see what is the order
@@ -144,8 +160,8 @@ class climber():
 
         # Region
         routes_country = routes[routes.country == self.location[0]]
-        routes_crag = routes[routes.crag == self.location[1]]
-        routes_sector = routes[routes.sector == self.location[2]]
+        routes_crag = routes_country[routes_country.crag == self.location[1]]
+        routes_sector = routes_crag[routes_crag.sector == self.location[2]]
 
         # Recommen
         routes_country_rec = self.recommender_filter(routes_country, show)

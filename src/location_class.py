@@ -30,3 +30,14 @@ class location():
         if (len(df.country.unique()) > 1):
             print("same crag: ", crag,"in different countries: ",df.country.unique)
         return df.sector.unique()
+    
+    def routes_in_country(self, country):
+        return self.routes[self.routes.country == country]
+      
+    def routes_in_crag(self, country, crag):
+        routes_f = self.routes_in_country(country)
+        return routes_f[routes_f.crag == crag]
+    
+    def routes_in_sector(self, country, crag, sector):
+        routes_f = self.routes_in_crag(country, crag)
+        return routes_f[routes_f.sector == sector]

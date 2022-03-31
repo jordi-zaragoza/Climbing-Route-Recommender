@@ -31,7 +31,7 @@ def Crag_search(routes_identifier, identifier):
     output:
     a dataframe with the routes filtered
     '''
-    if any(type(identifier) == int):
+    if type(identifier) == int:
         return routes_identifier[routes_identifier.crag_id == identifier]
     else:
         return routes_identifier[routes_identifier.crag == identifier]    
