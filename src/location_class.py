@@ -6,6 +6,18 @@ class location():
         print("Location class initialized")
         self.routes = routes
 
+# -------------- Routes df handling ------------------------
+       
+    def remove_route(self, name_id):
+        '''
+        This method removes the route with the id name_id from the routes df
+        '''
+        self.routes = self.routes[self.routes.name_id != name_id]
+        print("Route removed, name_id -> ",name_id)
+            
+        
+
+# -------------- Lists of names -----------------------------
         
     def all_countries(self):
         '''
@@ -28,8 +40,10 @@ class location():
         '''
         df = self.routes[self.routes.crag == crag]
         if (len(df.country.unique()) > 1):
-            print("same crag: ", crag,"in different countries: ",df.country.unique)
+            print("same crag: ", crag,"in different countries: ",df.country.unique())
         return df.sector.unique()
+
+# -------------- Dataframes -----------------------------
     
     def routes_in_country(self, country):
         return self.routes[self.routes.country == country]
