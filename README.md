@@ -4,7 +4,9 @@ This repository recommends sports-climbing routes
 
 ## Overview
 
-I created a route recommender based on the features of the routes. I also created an app using this recommender, you can find it online on [this link](www.google.com)
+I created a route recommender based on the features of the routes. It takes the databases from the website 8a.nu and cleans them. After cleaning I use Knn modelling to cluster the data and get a table of clustered routes. With that information and the routes ratings I created a recommender based on the user's features and routes climbed.
+
+I also created an app using this recommender, you can find it online on [this link](www.google.com)
 
 ## Contents
 
@@ -66,7 +68,17 @@ Thanks to David Cohen for creating the scrapper (https://github.com/mplaine/8a.n
 
 
 ## Requirements
-
+- matplotlib==3.3.4
+- numpy==1.19.5
+- pandas==1.4.1
+- polyglot==16.7.4
+- regex==2020.11.13
+- scikit_learn==1.0.2
+- scipy==1.6.0
+- seaborn==0.11.2
+- sentiment_analysis_spanish==0.0.25
+- streamlit==1.8.0
+- vaderSentiment==3.3.2
 
 ## Diagram
 

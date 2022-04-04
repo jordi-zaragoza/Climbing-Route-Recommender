@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
-import pickle
 import streamlit as st
-import climb_jor
 from grades_class import grades
 from location_class import location
 from climber_class import climber
-
+from streamlit.legacy_caching import clear_cache
+import pyautogui
+ 
 # This is the route recommender script
 #
 # I created a route recommender based on the features of the routes and the climber.
@@ -26,13 +26,13 @@ st.set_page_config(
 
 @st.cache(allow_output_mutation=True)
 def get_grades_instance():
-    # Fetch data from URL here, and then clean it up.
+
     gr = grades()
     return gr
 
 @st.cache(allow_output_mutation=True)
 def get_location_instance():
-    # Fetch data from URL here, and then clean it up.
+
     routes = pd.read_csv('../data/routes_rated.csv',low_memory=False, index_col=0)
     loc = location(routes)
     print("Routes shape: ", loc.routes.shape)
@@ -40,7 +40,7 @@ def get_location_instance():
 
 @st.cache(allow_output_mutation=True)
 def get_climber_instance():
-    # Fetch data from URL here, and then clean it up.
+
     cl = climber()
     return cl
 
@@ -133,7 +133,7 @@ def main():
                          options = (get_grades_instance().get_grades_fra()),
                          index = 5)
 
-    grade_r = cols[1].slider('Grade range', 1, 10)
+    grade_r = cols[1].slider('Grade range', 1, 10, 2)
     grade_range = grade_r * 2
 
     cols = st.columns(3)
@@ -161,71 +161,71 @@ def main():
     routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(routes = get_location_instance().routes)
     
     if st.button('Shuffle'):
-        print("Routes shape: ", get_location_instance().routes.shape)
+                
+        routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(routes = get_location_instance().routes)
         
+    print(routes_sector_rec.shape[0])
 
-    # st.header('Sector - ' + sector.capitalize())       
-    # display_nice(routes_sector_rec.head(1))   
-
-    route = routes_sector_rec.head(1)
-
-
-
-    
-
-    try:
+    if (routes_sector_rec.shape[0] > 0): 
+        
+        route = routes_sector_rec.head(1)
+        
         st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
         col1, col2, col3 = st.columns(3)
-        
+
         with col1:  
-            
+
             st.title(route.name.values[0].capitalize())
             st.subheader(get_grades_instance().get_fra(round(route.grade_mean.values[0])))  
 
         with col3:
-                
+
             liked = st.radio("Have you done it?",
                              ('Liked', 'Not liked', 'Meh...'))
 
             if st.button('Done'):
                 if liked == 'Liked':
                     get_climber_instance().add_route_liked(route)
-                    get_location_instance().remove_route(route.name_id.values[0])    
+
                 elif liked == 'Not liked':
                     get_climber_instance().add_route_not_liked(route)    
-                    get_location_instance().remove_route(route.name_id.values[0])  
                 else:
                     get_climber_instance().add_route(route)
-                    get_location_instance().remove_route(route.name_id.values[0]) 
-                    
-                print("Routes shape: ", get_location_instance().routes.shape)
 
-    except:
+    elif (routes_crag_rec.shape[0] > 0):
+        print("crag")
+        route = routes_crag_rec.head(1)
+        
+        st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
+        col1, col2, col3 = st.columns(3)
 
-        st.write("Cannot find any route, try to use another range")
+        with col1:  
 
-    # with col3:
-    #     if st.button('Liked'):
-    #         climber_ins.add_route_liked(route)
-    #         loc.remove_route(route.name_id.values[0])
+            st.title(route.name.values[0].capitalize())
+            st.subheader(get_grades_instance().get_fra(round(route.grade_mean.values[0])))  
 
-    # with col4:
-    #     if st.button('Normal'):
-    #         climber_ins.add_route(route)
-    #         loc.remove_route(route.name_id.values[0])              
+        with col3:
 
-    # with col5:
-    #     if st.button('Not liked'):
-    #         climber_ins.add_route_not_liked(route)    
-    #         loc.remove_route(route.name_id.values[0])
+            liked = st.radio("Have you done it?",
+                             ('Liked', 'Not liked', 'Meh...'))
 
+            if st.button('Done'):
+                if liked == 'Liked':
+                    get_climber_instance().add_route_liked(route)
+
+                elif liked == 'Not liked':
+                    get_climber_instance().add_route_not_liked(route)    
+                else:
+                    get_climber_instance().add_route(route)
+                        
+    else:
+        st.write("Cannot find any route, try to use a wider grade range")
+        
 
     # --- Button ---
-    with st.expander('Show me more'):
+    with st.expander('Show me more'):        
 
         routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(routes = get_location_instance().routes)
-
-    #     st.balloons()
 
         st.header('Sector - ' + sector.capitalize())       
         display_nice(routes_sector_rec.head(5))   
@@ -238,6 +238,8 @@ def main():
         st.header('Country - '+ country.capitalize())           
         display_nice(routes_country_rec.head(5)) 
 
+        
+    get_location_instance().remove_route(route.name_id.values[0]) 
         
     # ------------------------- Info -----------------------------------------------
 
@@ -253,43 +255,16 @@ def main():
 
         st.write('Details')
 
-        st.write(get_climber_instance().get_data())
+        st.write(get_climber_instance().get_data()[['name','ascents','sector','height']])
         
-        # if st.button('Route search/Routes done'):
-        # # with st.expander("Route search"):
-
-        #     routes_sector_all = loc.routes_in_sector(country, crag, sector)
-
-        #     for idx in range(routes_sector_all.shape[0] if routes_sector_all.shape[0] < 5 else 5):
-
-        #         route = routes_sector_all.iloc[[idx]]
-
-        #         col1, col2, col3, col4, col5 = st.columns(5)
-
-        #         with col1:
-        #             st.write(route.name.values[0].capitalize())
-
-        #         with col2:
-        #             st.write(get_grades_instance().get_fra(round(route.grade_mean.values[0])))
-
-        #         with col3:
-        #             if st.button(str(idx)+' Liked'):
-        #                 climber_ins.add_route_liked(route)
-        #                 loc.remove_route(route.name_id.values[0])
-
-        #         with col4:
-        #             if st.button(str(idx)+' Normal'):
-        #                 climber_ins.add_route(route)
-        #                 loc.remove_route(route.name_id.values[0])              
-
-        #         with col5:
-        #             if st.button(str(idx)+' Not liked'):
-        #                 climber_ins.add_route_not_liked(route)    
-        #                 loc.remove_route(route.name_id.values[0])
-
-        #         st.markdown("""---""")        
+        order = pd.DataFrame(get_climber_instance().get_cluster_order())
+        order.reset_index(inplace = True)
+        order.columns = ['priority order', 'cluster number']
+        st.write(order)
         
-        
-        
+    if st.button('Reset app'):    
+        pyautogui.hotkey("ctrl","F5")
+        st.legacy_caching.clear_cache()
+    
 if __name__ == "__main__":
     main()

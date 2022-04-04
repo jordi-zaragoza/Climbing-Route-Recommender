@@ -74,25 +74,34 @@ class climber():
             self.cluster[cluster_num] = self.cluster[cluster_num] + like    
             
     def add_route(self,routes):
-        self.ascents = self.ascents + 1
-        rt = routes.copy()
-        rt['liked'] = 'N/A'
-        self.routes_indifferent = pd.concat([self.routes_indifferent, rt])
-                
+        if (self.get_routes_climbed().shape[0] == 0) or not (routes.name_id.values in self.get_routes_climbed().name_id.values):
+            self.ascents = self.ascents + 1
+            rt = routes.copy()
+            rt['liked'] = 'N/A'
+            self.routes_indifferent = pd.concat([self.routes_indifferent, rt])
+        else:
+            print("Route already in")
+            
     def add_route_liked(self,routes):
-        self.ascents = self.ascents + 1        
-        rt = routes.copy()
-        rt['liked'] = 'Yes'
-        self.routes_liked = pd.concat([self.routes_liked, rt])
-        self.add_cluster(routes.cluster,1)
-       
+        if (self.get_routes_climbed().shape[0] == 0) or not (routes.name_id.values in self.get_routes_climbed().name_id.values):
+            self.ascents = self.ascents + 1        
+            rt = routes.copy()
+            rt['liked'] = 'Yes'
+            self.routes_liked = pd.concat([self.routes_liked, rt])
+            self.add_cluster(routes.cluster,1)
+        else:
+            print("Route already in")
+            
     def add_route_not_liked(self,routes):
-        self.ascents = self.ascents + 1        
-        rt = routes.copy()
-        rt['liked'] = 'No'
-        self.routes_not_liked = pd.concat([self.routes_not_liked, rt])
-        self.add_cluster(routes.cluster,-1)
-        
+        if (self.get_routes_climbed().shape[0] == 0) or not (routes.name_id.values in self.get_routes_climbed().name_id.values):
+            self.ascents = self.ascents + 1        
+            rt = routes.copy()
+            rt['liked'] = 'No'
+            self.routes_not_liked = pd.concat([self.routes_not_liked, rt])
+            self.add_cluster(routes.cluster,-1)
+        else:
+            print("Route already in")
+            
     def clear_routes(self):
         self.ascents = 0
         self.routes_liked.drop(self.routes_liked.index, inplace=True)
