@@ -4,7 +4,7 @@ This repository recommends sports-climbing routes
 
 ## Overview
 
-I created a route recommender based on the features of the routes. It takes the databases from the website 8a.nu and cleans them. After cleaning I use Knn modelling to cluster the data and get a table of clustered routes. With that information and the routes ratings I created a recommender based on the user's features and routes climbed.
+I created a route recommender based on the features of the routes. I took the databases scrapped from the website 8a.nu and cleaned them. After cleaning I used Knn modelling to cluster the data and get a table of clustered routes. With that information and the routes ratings I created a recommender based on the user's input features and routes climbed.
 
 I also created an app using this recommender, you can find it online on [this link](www.google.com)
 

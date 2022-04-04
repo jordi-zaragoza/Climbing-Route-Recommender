@@ -1,11 +1,10 @@
 import pandas as pd
-import numpy as np
 import streamlit as st
 from grades_class import grades
 from location_class import location
 from climber_class import climber
-from streamlit.legacy_caching import clear_cache
-import pyautogui
+import requests
+from streamlit_lottie import st_lottie
 
 # This is the route recommender script
 #
@@ -22,9 +21,7 @@ st.set_page_config(
     page_title="Route recommender", page_icon="🧗"
 )
 
-
 # ----------------------------- Functions to run once --------------------------------
-
 @st.cache(allow_output_mutation=True)
 def get_grades_instance():
     gr = grades()
@@ -46,6 +43,12 @@ def get_climber_instance():
 
 
 # ----------------------------- Other Functions ----------------------------------------
+def load_lottieurl(url):
+    r = requests.get(url)
+    if r.status_code != 200:
+      return None
+    return r.json()
+
 def crags(country, cols):
     options = get_location_instance().crags_in_country(country)
     idx = 0
@@ -95,12 +98,11 @@ def display_nice_2(routes_df):
 
     st.write(routes_nice)
 
+# ----------------------- Gifs -----------------------------------------
+escaladora = load_lottieurl('https://assets5.lottiefiles.com/packages/lf20_12cye8ob.json')
+mountain1 = load_lottieurl('https://assets2.lottiefiles.com/packages/lf20_dqn6Dn.json')
 
 # ----------------------------- Graphical Part ----------------------------------------
-
-st.title('⛰️ Climb Recommender 🧗')
-
-st.markdown("""---""")
 
 st.sidebar.write(
     f"Hi there 👋"
@@ -123,9 +125,27 @@ st.sidebar.write(
     f"created by Jordi Zaragoza"
 )
 
+col1, col2, col3 = st.columns([1, 5, 1])
+
+with col1:
+    st.write(" ")
+    st_lottie(mountain1, key='m1')
+
+with col2:
+    st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+
+with col3:
+    st.write(" ")
+    st_lottie(mountain1, key='m2')
+
+st.write(" ")
+st.markdown("""---""")
+st.write(" ")
+st.write(" ")
 
 # ----------------------- Form -----------------------------------------
 def main():
+
     cols = st.columns(2)
     name = cols[0].text_input('Enter your name', 'Peter')
 
@@ -156,7 +176,11 @@ def main():
                                           location=[country, crag, sector],
                                           height=height)
 
+    st.write(" ")
+    st.write(" ")
     st.markdown("""---""")
+    st.write(" ")
+    st.write(" ")
 
     # ----------------------- Recommendation -----------------------------------------
 
@@ -228,6 +252,14 @@ def main():
     else:
         st.write("Cannot find any route, try to use a wider grade range")
 
+    st.write(" ")
+    st.markdown("""---""")
+    st.write(" ")
+    st.write(" ")
+
+    st_lottie(escaladora, key='c1')
+
+    st.markdown("""---""")
     st.write(" ")
 
     # --- Button ---
