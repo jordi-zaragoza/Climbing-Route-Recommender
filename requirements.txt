@@ -9,3 +9,4 @@ seaborn==0.11.2
 sentiment_analysis_spanish==0.0.25
 streamlit==1.8.0
 vaderSentiment==3.3.2
+click<=8.0.4
