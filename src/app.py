@@ -4,6 +4,7 @@ from grades_class import grades
 from location_class import location
 from climber_class import climber
 import requests
+import pyautogui
 from streamlit_lottie import st_lottie
 
 # This is the route recommender script
@@ -220,6 +221,17 @@ def main():
                 st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(round(route.grade_mean.values[0])))
                 st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
 
+        else:
+            if routes_crag_rec.shape[0] > 0:
+                with col1:
+                    route = routes_crag_rec.head(1)
+                    st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
+                    st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(
+                        round(route.grade_mean.values[0])))
+                    st.write(" ")
+                    st.write(" ")
+                    st.write("Cannot find a route in this sector, crag recommendation")
+
     elif routes_crag_rec.shape[0] > 0:
         print("crag")
         route = routes_crag_rec.head(1)
@@ -243,12 +255,14 @@ def main():
                 routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
                     routes=get_location_instance().routes)
 
-        with col1:
-            if routes_crag_rec.shape[0] > 0:
+        if routes_crag_rec.shape[0] > 0:
+            with col1:
                 route = routes_crag_rec.head(1)
                 st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
                 st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(round(route.grade_mean.values[0])))
-
+                st.write(" ")
+                st.write(" ")
+                st.write("Cannot find a route in this sector, crag recommendation")
     else:
         st.write("Cannot find any route, try to use a wider grade range")
 
@@ -299,6 +313,10 @@ def main():
         order.reset_index(inplace=True)
         order.columns = ['priority order', 'cluster number']
         st.write(order)
+
+
+    st.markdown("""---""")
+
 
     if st.button('Reset app'):
         pyautogui.hotkey("ctrl", "F5")
