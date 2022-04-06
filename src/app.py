@@ -7,7 +7,7 @@ import requests
 from streamlit_lottie import st_lottie
 import seaborn as sns
 import matplotlib.pyplot as plt
-import wx
+
 
 # This is the route recommender script
 #
@@ -58,8 +58,8 @@ def load_lottieurl(url):
 def crags(country, cols):
     options = get_location_instance().crags_in_country(country)
     idx = 0
-    if len(options) > 101:
-        idx = 101
+    if len(options) > 109:
+        idx = 110
 
     crag = cols[1].selectbox(
         label='Select crag',
@@ -72,7 +72,7 @@ def sectors(crag, cols):
     idx = 0
     options = get_location_instance().sectors_in_crag(crag)
     if len(options) > 10:
-        idx = 10
+        idx = 5
 
     sector = cols[2].selectbox(
         label='Select sector',
@@ -131,29 +131,31 @@ st.sidebar.write(
     f"created by Jordi Zaragoza"
 )
 
-col1, col2, col3 = st.columns([1, 5, 1])
+col1, col2, col3 = st.columns([5, 2, 5])
 
-app = wx.App(False)
-width, height = wx.GetDisplaySize()
 
-if (width > height):
+#if (width > height):
 
-    print("computer")
-    with col1:
-        st.write(" ")
-        st_lottie(mountain1, key='m1')
+#print("computer")
+with col1:
+    st.write(" ")
 
-    with col2:
-        st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+with col2:
+    st_lottie(mountain1, key='m1')
 
-    with col3:
-        st.write(" ")
-        st_lottie(mountain1, key='m2')
-else:
-    print("phone")
+with col3:
+    st.write(" ")
 
-    with col2:
-        st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>",unsafe_allow_html=True)
+
+# with col3:
+#     st.write(" ")
+#     st_lottie(mountain1, key='m2')
+#else:
+#    print("phone")
+
+#    with col2:
+#        st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", #unsafe_allow_html=True)
 
 
 # st.write(" ")
@@ -162,6 +164,7 @@ else:
 # st.write(" ")
 # st_lottie(mountain1, key='m2')
 
+st.write(" ")
 st.write(" ")
 st.markdown("""---""")
 st.write(" ")
@@ -339,20 +342,29 @@ def main():
         st.write(get_climber_instance().get_data()[['name', 'ascents', 'sector', 'height']])
 
         st.write(" ")
-        st.subheader('Clusters priority')
+        st.subheader('Clusters')
         st.write(" ")
 
         col1, col2, col3 = st.columns([2,20,3])
 
         with col2:
-
-            order = pd.DataFrame(get_climber_instance().get_cluster_order())
+            lst = get_climber_instance().get_cluster_order()
+            lst_updown = [lst[len(lst)-idx-1] for idx in range(len(lst))]
+            order = pd.DataFrame(lst_updown)
             order.reset_index(inplace=True)
             order.columns = ['priority order', 'cluster number']
 
             fig = plt.figure(figsize=(6, 2))
             sns.barplot(x="cluster number", y="priority order", data=order)
             st.pyplot(fig)
+
+            clusters = pd.DataFrame(get_climber_instance().cluster)
+            clusters.reset_index(inplace=True)
+            clusters.columns = ['cluster number','times liked']
+
+            fig2 = plt.figure(figsize=(6, 2))
+            sns.barplot(x="cluster number", y="times liked", data=clusters)
+            st.pyplot(fig2)
 
 
 
@@ -366,3 +378,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -33,7 +33,7 @@ class text_processor():
         
 # ---------------- Text cleaning ------------------------
 
-    def cleaning_function(self,a):
+    def cleaning_function(self, a):
         '''
         function used for clining a list of strings    
         '''    
@@ -43,8 +43,14 @@ class text_processor():
 
         a3 = self.remove_punct_array(a2)
 
-        return a3
+        a4 = self.remove_first_the(a3)
 
+        return a4
+    
+    @staticmethod       
+    def remove_first_the(s1):
+        return [re.sub('(?:^|(?:[.!?]\s))(the |el |la |las |los )', '',word) for word in s1]
+    
     @staticmethod        
     def lower_array(a):
         return [(str(word)).lower() for word in a]        
