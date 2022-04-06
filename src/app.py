@@ -4,8 +4,10 @@ from grades_class import grades
 from location_class import location
 from climber_class import climber
 import requests
-import pyautogui
 from streamlit_lottie import st_lottie
+import seaborn as sns
+import matplotlib.pyplot as plt
+import wx
 
 # This is the route recommender script
 #
@@ -21,6 +23,9 @@ from streamlit_lottie import st_lottie
 st.set_page_config(
     page_title="Route recommender", page_icon="🧗"
 )
+
+if 'key' not in st.session_state:
+    st.session_state['key'] = 1
 
 # ----------------------------- Functions to run once --------------------------------
 @st.cache(allow_output_mutation=True)
@@ -128,16 +133,34 @@ st.sidebar.write(
 
 col1, col2, col3 = st.columns([1, 5, 1])
 
-with col1:
-    st.write(" ")
-    st_lottie(mountain1, key='m1')
+app = wx.App(False)
+width, height = wx.GetDisplaySize()
 
-with col2:
-    st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+if (width > height):
 
-with col3:
-    st.write(" ")
-    st_lottie(mountain1, key='m2')
+    print("computer")
+    with col1:
+        st.write(" ")
+        st_lottie(mountain1, key='m1')
+
+    with col2:
+        st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+
+    with col3:
+        st.write(" ")
+        st_lottie(mountain1, key='m2')
+else:
+    print("phone")
+
+    with col2:
+        st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+
+
+# st.write(" ")
+# st_lottie(mountain1, key='m1')
+# st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+# st.write(" ")
+# st_lottie(mountain1, key='m2')
 
 st.write(" ")
 st.markdown("""---""")
@@ -299,27 +322,45 @@ def main():
 
     with st.expander('User Info'):
 
-        st.write('Routes climbed')
+        st.write(" ")
+        st.subheader('Routes Climbed')
+        st.write(" ")
 
         df_routes_climbed = get_climber_instance().get_routes_climbed()
         if df_routes_climbed.shape[0] > 0:
             display_nice_2(df_routes_climbed)
+        else:
+            st.write("No routes introduced yet")
 
-        st.write('Details')
+        st.write(" ")
+        st.subheader('Details')
+        st.write(" ")
 
         st.write(get_climber_instance().get_data()[['name', 'ascents', 'sector', 'height']])
 
-        order = pd.DataFrame(get_climber_instance().get_cluster_order())
-        order.reset_index(inplace=True)
-        order.columns = ['priority order', 'cluster number']
-        st.write(order)
+        st.write(" ")
+        st.subheader('Clusters priority')
+        st.write(" ")
+
+        col1, col2, col3 = st.columns([2,20,3])
+
+        with col2:
+
+            order = pd.DataFrame(get_climber_instance().get_cluster_order())
+            order.reset_index(inplace=True)
+            order.columns = ['priority order', 'cluster number']
+
+            fig = plt.figure(figsize=(6, 2))
+            sns.barplot(x="cluster number", y="priority order", data=order)
+            st.pyplot(fig)
+
 
 
     st.markdown("""---""")
 
 
-    if st.button('Reset app'):
-        pyautogui.hotkey("ctrl", "F5")
+    if st.button('Reset'):
+        st.session_state.key += 1
         st.legacy_caching.clear_cache()
 
 
