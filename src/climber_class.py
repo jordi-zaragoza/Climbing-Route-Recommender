@@ -8,11 +8,11 @@ class climber():
     '''
     
     climber_count = 0
-    num_clusters = 5
+    num_clusters = 4
      
     def __init__(self, name = None, grade = 54, grade_range = 2,
                  location = ['esp', 'montserrat', 'agulla del senglar'], 
-                 height = 170,cluster = [0,0,0,0,0], ascents = 0):
+                 height = 170,cluster = [0,0,0,0], ascents = 0):
         
         print("Climber class initialized")
         self.gr = grades_class.grades()
@@ -37,7 +37,7 @@ class climber():
         
         self.ascents = ascents
         self.location = location # location = [country,crag,sector]
-        self.cluster = cluster # its cluster 0 by default
+        self.cluster = [0] * self.num_clusters # its cluster 0 by default
         self.height = height
         self.grade_range = grade_range    
     
@@ -107,7 +107,7 @@ class climber():
         self.routes_liked.drop(self.routes_liked.index, inplace=True)
         self.routes_indifferent.drop(self.routes_indifferent.index, inplace=True)
         self.routes_not_liked.drop(self.routes_not_liked.index, inplace=True) 
-        self.cluster = [0,0,0,0,0]
+        self.cluster = [0] * self.num_clusters
 
 # -------------- Get methods ---------------        
                 
