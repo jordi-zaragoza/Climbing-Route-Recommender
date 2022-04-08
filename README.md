@@ -17,10 +17,10 @@ Notebooks
 4. `src/4.route_recommender.ipynb` - Where I define the route recommender
 
 Clases
-1. `src/climber_class.py` - User class
-2. `src/location_class.py` - Class for the location
-3. `src/text_processor_class.py` - It contains sentiment, language recognition, word matching and cleaning. 
-4. `src/grades_class.py` - Used for the class conversor
+1. `src/lib/climber_class.py` - User class
+2. `src/lib/location_class.py` - Class for the location
+3. `src/lib/text_processor_class.py` - It contains sentiment, language recognition, word matching and cleaning. 
+4. `src/lib/grades_class.py` - Used for the class conversor
 
 Guides
 - I created these guides to understand how my classes work
