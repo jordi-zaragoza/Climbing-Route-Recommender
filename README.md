@@ -8,6 +8,8 @@ I created a route recommender based on the features of the routes. I took the da
 
 I also created an app using this recommender, I deployed it in Heroku, you can find it online on [this link](https://route-recommender-app-eu.herokuapp.com/)
 
+![App_gif](img/app_gif.gif)
+
 ## Contents
 
 Notebooks
