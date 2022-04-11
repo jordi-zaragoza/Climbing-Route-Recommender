@@ -7,11 +7,11 @@ class climber():
     '''
     
     climber_count = 0
-    num_clusters = 4
+    num_clusters = 9
      
     def __init__(self, name = None, grade = 54, grade_range = 2,
                  location = ['esp', 'montserrat', 'agulla del senglar'], 
-                 height = 170,cluster = [0,0,0,0], ascents = 0):
+                 height = 170, ascents = 0, cluster_init = 0):
         
         print("Climber class initialized")
         self.gr = grades_class.grades()
@@ -36,7 +36,10 @@ class climber():
         
         self.ascents = ascents
         self.location = location # location = [country,crag,sector]
-        self.cluster = [0] * self.num_clusters # its cluster 0 by default
+        
+        self.cluster = [0] * self.num_clusters 
+        self.cluster[cluster_init] = 1 # it starts giving priority to cluster_init
+        
         self.height = height
         self.grade_range = grade_range    
     
@@ -44,7 +47,7 @@ class climber():
     def add_climber(cls):
         cls.climber_count = cls.climber_count + 1
                 
-    def set_attributes(self, name = None, grade = None, cluster = None, location = None, height = None, grade_range = None):
+    def set_attributes(self, name = None, grade = None, cluster = None, location = None, height = None, grade_range = None, cluster_init = None):
         if name != None:
             self.name = name
         if grade != None:            
@@ -60,7 +63,10 @@ class climber():
             self.height = height  
         if grade_range != None:
             self.grade_range = grade_range
-
+        if cluster_init != None:
+            self.cluster = [0] * self.num_clusters 
+            self.cluster[cluster_init] = 1 # it starts giving priority to cluster_init
+            
 # -------------- Route methods ---------------
             
     def add_cluster(self, cluster_list, like):

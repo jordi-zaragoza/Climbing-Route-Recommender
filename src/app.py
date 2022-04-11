@@ -1,7 +1,7 @@
 from streamlit_lottie import st_lottie
 import seaborn as sns
 import matplotlib.pyplot as plt
-from st_jzar import *
+from lib.st_jzar import *
 
 # This is the route recommender script
 #
@@ -70,10 +70,17 @@ st.write(" ")
 # ----------------------- Form -----------------------------------------
 def main():
     cols = st.columns(2)
-    name = cols[0].text_input('Enter your name', 'Peter')
+    
+    # Initial cluster
+    cluster_init_key = cols[0].selectbox(label='What kind of routes do you prefer',
+                              options=(cluster_list).values())    
+    cluster_init_value = list(cluster_list.keys())[list(cluster_list.values()).index(cluster_init_key)]
+    print("cluster init number:", cluster_init_value)
 
+    # Height
     height = cols[1].slider('Select your height (cm)', 150, 200, 175)
 
+    # Grade options
     cols = st.columns(2)
     grade = cols[0].selectbox(label='Select your grade (fra)',
                               options=(get_grades_instance().get_grades_fra()),
@@ -84,6 +91,7 @@ def main():
 
     cols = st.columns(3)
 
+    # Location options
     country = cols[0].selectbox(
         label='Select the country',
         options=(get_location_instance().all_countries()),
@@ -93,11 +101,11 @@ def main():
 
     sector = sectors(crag, cols, get_location_instance())
 
-    get_climber_instance().set_attributes(name=name,
-                                          grade=grade,
+    get_climber_instance().set_attributes(grade=grade,
                                           grade_range=grade_range,
                                           location=[country, crag, sector],
-                                          height=height)
+                                          height=height,
+                                          cluster_init = cluster_init_value)
 
     st.write(" ")
     st.write(" ")
@@ -233,24 +241,10 @@ def main():
 
         col1, col2, col3 = st.columns([2, 20, 3])
 
+        col1, col2, col3 = st.columns([2, 20, 3])
+
         with col2:
-            lst = get_climber_instance().get_cluster_order()
-            lst_updown = [lst[len(lst) - idx - 1] for idx in range(len(lst))]
-            order = pd.DataFrame(lst_updown)
-            order.reset_index(inplace=True)
-            order.columns = ['priority order', 'cluster number']
-
-            fig = plt.figure(figsize=(6, 2))
-            sns.barplot(x="cluster number", y="priority order", data=order)
-            st.pyplot(fig)
-
-            clusters = pd.DataFrame(get_climber_instance().cluster)
-            clusters.reset_index(inplace=True)
-            clusters.columns = ['cluster number', 'times liked']
-
-            fig2 = plt.figure(figsize=(6, 2))
-            sns.barplot(x="cluster number", y="times liked", data=clusters)
-            st.pyplot(fig2)
+            plot_figures()
 
     st.markdown("""---""")
 

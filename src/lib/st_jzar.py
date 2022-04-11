@@ -1,10 +1,11 @@
 import requests
 import streamlit as st
-from grades_class import grades
-from location_class import location
-from climber_class import climber
+from lib.grades_class import grades
+from lib.location_class import location
+from lib.climber_class import climber
 import pandas as pd
-
+from bokeh.plotting import figure
+from bokeh.models import Panel, Tabs, HoverTool, Range1d
 
 # ----------------------------- Functions to run once --------------------------------
 @st.cache(allow_output_mutation=True)
@@ -68,6 +69,8 @@ def display_nice(routes_df, gr):
 
     routes_nice = routes_nice[['name', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
 
+    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
+        
     st.write(routes_nice)
 
 
@@ -87,6 +90,8 @@ def display_nice_crag(routes_df, gr):
     routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
 
     routes_nice = routes_nice[['name', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
+    
+    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
 
     st.write(routes_nice)
 
@@ -98,6 +103,8 @@ def display_nice_country(routes_df, gr):
 
     routes_nice = routes_nice[['name', 'crag', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
 
+    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
+    
     st.write(routes_nice)
 
 
@@ -107,8 +114,82 @@ def like_it(liked, route, cl):
         'Not liked': lambda: cl.add_route_not_liked(route)
     }.get(liked, lambda: cl.add_route(route))()
 
+def plot_figures():
+    lst = get_climber_instance().get_cluster_order()
+    lst_updown = [lst[len(lst) - idx - 1] for idx in range(len(lst))]
+    order = pd.DataFrame(lst_updown)
+    order.reset_index(inplace=True)
+    order.columns = ['priority order', 'cluster number']
 
+    hover = HoverTool(
+        tooltips=[
+            ('Cluster', '$x{0}'),
+        ],
+    )
+
+    p = figure(
+        x_axis_label='Cluster number',
+        y_axis_label='Priority order',
+        width=500, height=400, tools=[hover])
+
+    p.vbar(x=order["cluster number"], top=order["priority order"], width=0.5)
+
+    p.xaxis.ticker = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    p.yaxis.ticker = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+    p.yaxis.major_label_overrides = {
+        0: r"Last",
+        1: "",
+        2: "",
+        3: "",
+        4: "",
+        5: "",
+        6: "",
+        7: "",
+        8: r"First"
+    }
+
+    clusters = pd.DataFrame(get_climber_instance().cluster)
+    clusters.reset_index(inplace=True)
+    clusters.columns = ['cluster number', 'times liked']
+
+    q = figure(
+        x_axis_label='Cluster number',
+        y_axis_label='Times liked',
+        width=500, height=400, tools=[hover])
+
+    q.vbar(x=clusters["cluster number"], top=clusters["times liked"], width=0.5)
+
+    q.xaxis.ticker = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    q.yaxis.ticker = [-1, 0, 1]
+    q.y_range = Range1d(-1, 1)
+
+    tab1 = Panel(child=p, title="Priority Order")
+    tab2 = Panel(child=q, title="Times liked")
+
+    all_tabs = Tabs(tabs=[tab1, tab2])
+
+    st.bokeh_chart(all_tabs, use_container_width=True)
+    
 # ----------------------- Gifs -----------------------------------------
 
 escaladora = load_lottieurl('https://assets5.lottiefiles.com/packages/lf20_12cye8ob.json')
 mountain1 = load_lottieurl('https://assets2.lottiefiles.com/packages/lf20_dqn6Dn.json')
+
+# ----------------------- Cluster types --------------------------------
+
+cluster_list = {2:'Very Famous',
+                8:'Famous but not so repeated',
+                4:'Very repeated',
+                3:'Very hard',
+                0:'Very soft',
+                6:'Traditional ',
+                5:'Chipped',
+                7:'Easy to On-sight',
+                1:'Routes for some reason preferred by women'}
+
+
+
+
+
+
