@@ -23,8 +23,8 @@ def get_location_instance():
 
 
 @st.cache(allow_output_mutation=True)
-def get_climber_instance():
-    cl = climber()
+def get_climber_instance(cluster_init_value = None):
+    cl = climber(cluster_init = cluster_init_value)
     return cl
 
 

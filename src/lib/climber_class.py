@@ -11,7 +11,7 @@ class climber():
      
     def __init__(self, name = None, grade = 54, grade_range = 2,
                  location = ['esp', 'montserrat', 'agulla del senglar'], 
-                 height = 170, ascents = 0, cluster_init = 0):
+                 height = 170, ascents = 0, cluster_init = None):
         
         print("Climber class initialized")
         self.gr = grades_class.grades()
@@ -22,7 +22,7 @@ class climber():
         
         self.climber_id = self.climber_count 
         
-        if name == None:
+        if name is None:
             self.name = 'climber'+ str(self.climber_count)
         else:
             self.name = name 
@@ -37,9 +37,10 @@ class climber():
         self.ascents = ascents
         self.location = location # location = [country,crag,sector]
         
-        self.cluster = [0] * self.num_clusters 
-        self.cluster[cluster_init] = 1 # it starts giving priority to cluster_init
-        
+        self.cluster = [0] * self.num_clusters
+        if cluster_init is not None:
+            self.cluster[cluster_init] = 1 # it starts giving priority to cluster_init
+
         self.height = height
         self.grade_range = grade_range    
     

@@ -101,14 +101,16 @@ def main():
 
     sector = sectors(crag, cols, get_location_instance())
 
-    get_climber_instance().set_attributes(grade=grade,
-                                          grade_range=grade_range,
-                                          location=[country, crag, sector],
-                                          height=height,
-                                          cluster_init = cluster_init_value)
+    st.write(" ")
+    st.write(" ")
 
-    st.write(" ")
-    st.write(" ")
+    if st.button('Recommend!'):
+        get_climber_instance().set_attributes(grade=grade,
+                                              grade_range=grade_range,
+                                              location=[country, crag, sector],
+                                              height=height,
+                                              cluster_init = cluster_init_value)
+
     st.markdown("""---""")
     st.write(" ")
     st.write(" ")
@@ -238,8 +240,6 @@ def main():
         st.write(" ")
         st.subheader('Clusters')
         st.write(" ")
-
-        col1, col2, col3 = st.columns([2, 20, 3])
 
         col1, col2, col3 = st.columns([2, 20, 3])
 
