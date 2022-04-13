@@ -162,7 +162,6 @@ def plot_figures():
 
     q.xaxis.ticker = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     q.yaxis.ticker = [-1, 0, 1]
-    q.y_range = Range1d(-1, 1)
 
     tab1 = Panel(child=p, title="Priority Order")
     tab2 = Panel(child=q, title="Times liked")
