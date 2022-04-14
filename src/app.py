@@ -1,6 +1,4 @@
 from streamlit_lottie import st_lottie
-import seaborn as sns
-import matplotlib.pyplot as plt
 from lib.st_jzar import *
 
 # This is the route recommender script
@@ -70,10 +68,10 @@ st.write(" ")
 # ----------------------- Form -----------------------------------------
 def main():
     cols = st.columns(2)
-    
+
     # Initial cluster
     cluster_init_key = cols[0].selectbox(label='What kind of routes do you prefer',
-                              options=(cluster_list).values())    
+                                         options=cluster_list.values())
     cluster_init_value = list(cluster_list.keys())[list(cluster_list.values()).index(cluster_init_key)]
     print("cluster init number:", cluster_init_value)
 
@@ -109,13 +107,13 @@ def main():
                                               grade_range=grade_range,
                                               location=[country, crag, sector],
                                               height=height,
-                                              cluster_init = cluster_init_value)
+                                              cluster_init=cluster_init_value)
 
     st.markdown("""---""")
     st.write(" ")
     st.write(" ")
 
-# ----------------------- Recommendation -----------------------------------------
+    # ----------------------- Recommendation -----------------------------------------
 
     routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
         routes=get_location_instance().routes)
@@ -126,9 +124,9 @@ def main():
 
         route = routes_sector_rec.head(1)
 
-        col1, col2 = st.columns([4, 1])
+        c1, c2 = st.columns([4, 1])
 
-        with col2:
+        with c2:
 
             st.write(" ")
 
@@ -141,7 +139,7 @@ def main():
                     routes=get_location_instance().routes)
 
         if routes_sector_rec.shape[0] > 0:
-            with col1:
+            with c1:
                 route = routes_sector_rec.head(1)
                 st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(
                     round(route.grade_mean.values[0])))
@@ -149,7 +147,7 @@ def main():
 
         else:
             if routes_crag_rec.shape[0] > 0:
-                with col1:
+                with c1:
                     route = routes_crag_rec.head(1)
                     st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
                     st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(
@@ -162,9 +160,9 @@ def main():
         print("crag")
         route = routes_crag_rec.head(1)
 
-        col1, col2 = st.columns([4, 1])
+        c1, c2 = st.columns([4, 1])
 
-        with col2:
+        with c2:
 
             liked = st.radio("Have you done it?", ('Liked', 'Not liked', 'Meh...'))
 
@@ -175,7 +173,7 @@ def main():
                     routes=get_location_instance().routes)
 
         if routes_crag_rec.shape[0] > 0:
-            with col1:
+            with c1:
                 route = routes_crag_rec.head(1)
                 st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
                 st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(
@@ -196,7 +194,7 @@ def main():
     st.markdown("""---""")
     st.write(" ")
 
-# -------------------------- Show me more button ---------------------------------------
+    # -------------------------- Show me more button ---------------------------------------
 
     with st.expander('Show me more'):
 
@@ -214,7 +212,7 @@ def main():
         st.header('Country - ' + country.capitalize())
         display_nice_country(routes_country_rec.head(5), get_grades_instance())
 
-# ------------------------- Climber Info -----------------------------------------------
+    # ------------------------- Climber Info -----------------------------------------------
 
     st.markdown("""---""")
 
@@ -241,9 +239,9 @@ def main():
         st.subheader('Clusters')
         st.write(" ")
 
-        col1, col2, col3 = st.columns([2, 20, 3])
+        c1, c2, c3 = st.columns([2, 20, 3])
 
-        with col2:
+        with c2:
             plot_figures()
 
     st.markdown("""---""")

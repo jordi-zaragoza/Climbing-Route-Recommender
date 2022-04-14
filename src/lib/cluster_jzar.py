@@ -1,14 +1,7 @@
-import pandas as pd
-import numpy as np
-from sklearn import datasets # sklearn comes with some toy datasets to practise
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
-from sklearn.mixture import GaussianMixture
-from sklearn.cluster import AgglomerativeClustering
-from scipy.cluster.hierarchy import dendrogram
-import matplotlib.pyplot as plt
-import seaborn as sns
 import pickle
+
+import numpy as np
+from scipy.cluster.hierarchy import dendrogram
 
 
 def plot_dendrogram(model, **kwargs):
@@ -32,11 +25,11 @@ def plot_dendrogram(model, **kwargs):
 
     # Plot the corresponding dendrogram
     dendrogram(linkage_matrix, **kwargs)
-    
-    
-def load_pickle(filename = "filename.pickle"): 
-    try: 
-        with open(filename, "rb") as file: 
-            return pickle.load(file) 
-    except FileNotFoundError: 
-        print("File not found!") 
+
+
+def load_pickle(filename="filename.pickle"):
+    try:
+        with open(filename, "rb") as file:
+            return pickle.load(file)
+    except FileNotFoundError:
+        print("File not found!")

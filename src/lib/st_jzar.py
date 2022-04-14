@@ -1,30 +1,33 @@
 import requests
 import streamlit as st
-from lib.grades_class import grades
-from lib.location_class import location
-from lib.climber_class import climber
+from lib.grades_class import Grades
+from lib.location_class import Location
+from lib.climber_class import Climber
 import pandas as pd
 from bokeh.plotting import figure
 from bokeh.models import Panel, Tabs, HoverTool, Range1d
 
+
 # ----------------------------- Functions to run once --------------------------------
+
+
 @st.cache(allow_output_mutation=True)
 def get_grades_instance():
-    gr = grades()
+    gr = Grades()
     return gr
 
 
 @st.cache(allow_output_mutation=True)
 def get_location_instance():
     routes = pd.read_csv('../data/routes_rated.csv', low_memory=False, index_col=0)
-    loc = location(routes)
+    loc = Location(routes)
     print("Routes shape: ", loc.routes.shape)
     return loc
 
 
 @st.cache(allow_output_mutation=True)
-def get_climber_instance(cluster_init_value = None):
-    cl = climber(cluster_init = cluster_init_value)
+def get_climber_instance(cluster_init_value=None):
+    cl = Climber(cluster_init=cluster_init_value)
     return cl
 
 
@@ -70,7 +73,7 @@ def display_nice(routes_df, gr):
     routes_nice = routes_nice[['name', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
 
     routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
-        
+
     st.write(routes_nice)
 
 
@@ -90,7 +93,7 @@ def display_nice_crag(routes_df, gr):
     routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
 
     routes_nice = routes_nice[['name', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
-    
+
     routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
 
     st.write(routes_nice)
@@ -104,7 +107,7 @@ def display_nice_country(routes_df, gr):
     routes_nice = routes_nice[['name', 'crag', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
 
     routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
-    
+
     st.write(routes_nice)
 
 
@@ -113,6 +116,7 @@ def like_it(liked, route, cl):
         'Liked': lambda: cl.add_route_liked(route),
         'Not liked': lambda: cl.add_route_not_liked(route)
     }.get(liked, lambda: cl.add_route(route))()
+
 
 def plot_figures():
     lst = get_climber_instance().get_cluster_order()
@@ -169,26 +173,22 @@ def plot_figures():
     all_tabs = Tabs(tabs=[tab1, tab2])
 
     st.bokeh_chart(all_tabs, use_container_width=True)
-    
+
+
 # ----------------------- Gifs -----------------------------------------
+
 
 escaladora = load_lottieurl('https://assets5.lottiefiles.com/packages/lf20_12cye8ob.json')
 mountain1 = load_lottieurl('https://assets2.lottiefiles.com/packages/lf20_dqn6Dn.json')
 
 # ----------------------- Cluster types --------------------------------
 
-cluster_list = {2:'Very Famous',
-                8:'Famous but not so repeated',
-                4:'Very repeated',
-                3:'Very hard',
-                0:'Very soft',
-                6:'Traditional ',
-                5:'Chipped',
-                7:'Easy to On-sight',
-                1:'Routes for some reason preferred by women'}
-
-
-
-
-
-
+cluster_list = {2: 'Very Famous',
+                8: 'Famous but not so repeated',
+                4: 'Very repeated',
+                3: 'Very hard',
+                0: 'Very soft',
+                6: 'Traditional ',
+                5: 'Chipped',
+                7: 'Easy to On-sight',
+                1: 'Routes for some reason preferred by women'}
