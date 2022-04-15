@@ -6,11 +6,10 @@ from lib.climber_class import Climber
 import pandas as pd
 from bokeh.plotting import figure
 from bokeh.models import Panel, Tabs, HoverTool, Range1d
+from streamlit_lottie import st_lottie
 
 
 # ----------------------------- Functions to run once --------------------------------
-
-
 @st.cache(allow_output_mutation=True)
 def get_grades_instance():
     gr = Grades()
@@ -31,12 +30,85 @@ def get_climber_instance(cluster_init_value=None):
     return cl
 
 
-# ----------------------------- Other Functions ----------------------------------------
-def load_lottieurl(url):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+# ----------------------------- Sidebar ----------------------------------------
+def sidebar():
+    st.sidebar.write(
+        f"Hi there 👋"
+    )
+
+    st.sidebar.write(
+        f"This is the climbing route recomender. My final project for the IronHack Data Analytics bootcamp"
+    )
+
+    st.sidebar.write(
+        f"I am sure that there are some things to improve... if you have any ideas or want to colab, feel free to ["
+        f"contact me](https://www.linkedin.com/in/jordi-zaragoza-cuffi/). "
+    )
+
+    st.sidebar.write(
+        f"[Github repo](https://github.com/jordi-zaragoza/Climbing-Route-Recommender) for more info about this app."
+    )
+
+    st.sidebar.write(
+        f"created by Jordi Zaragoza"
+    )
+
+
+# ----------------------------- Page config ------------------------------------------
+def page_config():
+    st.set_page_config(
+        page_title="Route recommender",
+        page_icon="mountain"
+    )
+
+    if 'key' not in st.session_state:
+        st.session_state['key'] = 1
+
+
+# ---------------------------- Title -----------------------------------------------
+def title():
+    col1, col2, col3 = st.columns([5, 2, 5])
+
+    with col1:
+        st.write(" ")
+
+    with col2:
+        st_lottie(mountain1, key='m1')
+
+    with col3:
+        st.write(" ")
+
+    st.markdown("<h1 style='text-align: center; color: black;'>Climb Recommender</h1>", unsafe_allow_html=True)
+
+    st.write(" ")
+    st.write(" ")
+    st.markdown("""---""")
+    st.write(" ")
+    st.write(" ")
+
+
+# ----------------------- Form -----------------------------------------
+class User_input:
+    def __init__(self):
+        self.grade = None
+        self.grade_range = None
+        self.location = None
+        self.height = None
+        self.cluster_init_value = None
+
+
+def button_recommend(user_input):
+    if st.button('Recommend!'):
+        get_climber_instance().set_attributes(grade=user_input.grade,
+                                              grade_range=user_input.grade_range,
+                                              location=user_input.location,
+                                              height=user_input.height,
+                                              cluster_init=user_input.cluster_init_value)
+
+
+def cluster_selector(cols):
+    cluster_init_key = cols[0].selectbox(label='What kind of routes do you prefer', options=cluster_list.values())
+    return list(cluster_list.keys())[list(cluster_list.values()).index(cluster_init_key)]
 
 
 def crags(country, cols, loc):
@@ -65,52 +137,53 @@ def sectors(crag, cols, loc):
     return sector
 
 
-def display_nice(routes_df, gr):
-    routes_nice = routes_df.copy()
+def location_selector():
+    cols = st.columns(3)
 
-    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
-
-    routes_nice = routes_nice[['name', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
-
-    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
-
-    st.write(routes_nice)
-
-
-def display_nice_2(routes_df, gr):
-    routes_nice = routes_df.copy()
-
-    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
-
-    routes_nice = routes_nice[['name', 'grade_fra', 'rating_tot', 'liked']]
-
-    st.write(routes_nice)
+    country = cols[0].selectbox(label='Select the country',
+                                options=(get_location_instance().all_countries()),
+                                index=17)
+    crag = crags(country, cols, get_location_instance())
+    sector = sectors(crag, cols, get_location_instance())
+    return [country, crag, sector]
 
 
-def display_nice_crag(routes_df, gr):
-    routes_nice = routes_df.copy()
+def get_user_input():
+    user_input = User_input
 
-    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
+    # ------ First line -------
+    cols = st.columns(2)
+    user_input.cluster_init_value = cluster_selector(cols)
+    user_input.height = cols[1].slider('Select your height (cm)', 150, 200, 175)
 
-    routes_nice = routes_nice[['name', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
+    # ------ Second line -------
+    cols = st.columns(2)
+    user_input.grade = cols[0].selectbox(label='Select your grade (fra)',
+                                         options=(get_grades_instance().get_grades_fra()),
+                                         index=5)
 
-    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
+    user_input.grade_range = cols[1].slider('Grade range', 1, 10, 2) * 2
 
-    st.write(routes_nice)
+    # ------ Third line -------
+    user_input.location = location_selector()
 
-
-def display_nice_country(routes_df, gr):
-    routes_nice = routes_df.copy()
-
-    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
-
-    routes_nice = routes_nice[['name', 'crag', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
-
-    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
-
-    st.write(routes_nice)
+    return user_input
 
 
+def form():
+    user_input = get_user_input()
+
+    st.write(" ")
+    st.write(" ")
+
+    button_recommend(user_input)
+
+    st.markdown("""---""")
+    st.write(" ")
+    st.write(" ")
+
+
+# ----------------------- Recommendation -----------------------------------------
 def like_it(liked, route, cl):
     return {
         'Liked': lambda: cl.add_route_liked(route),
@@ -118,6 +191,137 @@ def like_it(liked, route, cl):
     }.get(liked, lambda: cl.add_route(route))()
 
 
+def recommendation():
+    routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
+        routes=get_location_instance().routes)
+
+    print(routes_sector_rec.shape[0])
+
+    if routes_sector_rec.shape[0] > 0:
+
+        route = routes_sector_rec.head(1)
+
+        c1, c2 = st.columns([4, 1])
+
+        with c2:
+
+            st.write(" ")
+
+            liked = st.radio("Have you done it?", ('Liked', 'Not liked', 'Meh...'))
+
+            if st.button('Done'):
+                like_it(liked, route, get_climber_instance())
+                get_location_instance().remove_route(route.name_id.values[0])
+                routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
+                    routes=get_location_instance().routes)
+
+        if routes_sector_rec.shape[0] > 0:
+            with c1:
+                route = routes_sector_rec.head(1)
+                st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(
+                    round(route.grade_mean.values[0])))
+                st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
+
+        else:
+            if routes_crag_rec.shape[0] > 0:
+                with c1:
+                    route = routes_crag_rec.head(1)
+                    st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
+                    st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(
+                        round(route.grade_mean.values[0])))
+                    st.write(" ")
+                    st.write(" ")
+                    st.write("Cannot find a route in this sector, crag recommendation")
+
+    elif routes_crag_rec.shape[0] > 0:
+        print("crag")
+        route = routes_crag_rec.head(1)
+
+        c1, c2 = st.columns([4, 1])
+
+        with c2:
+
+            liked = st.radio("Have you done it?", ('Liked', 'Not liked', 'Meh...'))
+
+            if st.button('Done'):
+                like_it(liked, route, get_climber_instance())
+                get_location_instance().remove_route(route.name_id.values[0])
+                routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
+                    routes=get_location_instance().routes)
+
+        if routes_crag_rec.shape[0] > 0:
+            with c1:
+                route = routes_crag_rec.head(1)
+                st.subheader(route.crag.values[0].capitalize() + " - " + route.sector.values[0].capitalize())
+                st.title(route.name.values[0].capitalize() + " - " + get_grades_instance().get_fra(
+                    round(route.grade_mean.values[0])))
+                st.write(" ")
+                st.write(" ")
+                st.write("Cannot find a route in this sector, crag recommendation")
+    else:
+        st.write("Cannot find any route, try to use a wider grade range")
+
+    st.write(" ")
+    st.markdown("""---""")
+    st.write(" ")
+    st.write(" ")
+
+    st_lottie(escaladora, key='c1')
+
+    st.markdown("""---""")
+    st.write(" ")
+
+
+# -------------------------- Show me more button ---------------------------------------
+def display_nice(routes_df, gr):
+    routes_nice = routes_df.copy()
+    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
+    routes_nice = routes_nice[['name', 'grade_fra', 'rating_tot', 'liked']]
+    st.write(routes_nice)
+
+
+def display_nice_routes(routes_df, gr):
+    routes_nice = routes_df.copy()
+    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
+    routes_nice = routes_nice[['name', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
+    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
+    st.write(routes_nice)
+
+
+def display_nice_crag(routes_df, gr):
+    routes_nice = routes_df.copy()
+    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
+    routes_nice = routes_nice[['name', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
+    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
+    st.write(routes_nice)
+
+
+def display_nice_country(routes_df, gr):
+    routes_nice = routes_df.copy()
+    routes_nice['grade_fra'] = routes_nice.grade_mean.apply(lambda x: gr.get_fra(round(x)))
+    routes_nice = routes_nice[['name', 'crag', 'sector', 'grade_fra', 'rating_tot', 'cluster', 'height_plus']]
+    routes_nice['cluster'] = routes_nice['cluster'].apply(lambda x: cluster_list[x])
+    st.write(routes_nice)
+
+
+def show_me_more():
+    with st.expander('Show me more'):
+        routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
+            routes=get_location_instance().routes)
+
+        st.header('Sector - ' + get_climber_instance().location[2].capitalize())
+        display_nice_routes(routes_sector_rec.head(5), get_grades_instance())
+
+        st.markdown("""---""")
+        st.header('Crag - ' + get_climber_instance().location[1].capitalize())
+        display_nice_crag(routes_crag_rec.head(5), get_grades_instance())
+
+        st.markdown("""---""")
+        st.header('Country - ' + get_climber_instance().location[0].capitalize())
+        display_nice_country(routes_country_rec.head(5), get_grades_instance())
+
+
+# ------------------------- Climber Info -----------------------------------------------
 def plot_figures():
     lst = get_climber_instance().get_cluster_order()
     lst_updown = [lst[len(lst) - idx - 1] for idx in range(len(lst))]
@@ -175,7 +379,53 @@ def plot_figures():
     st.bokeh_chart(all_tabs, use_container_width=True)
 
 
+def climber_info():
+    st.markdown("""---""")
+
+    with st.expander('User Info'):
+
+        st.write(" ")
+        st.subheader('Routes Climbed')
+        st.write(" ")
+
+        df_routes_climbed = get_climber_instance().get_routes_climbed()
+
+        if df_routes_climbed.shape[0] > 0:
+            display_nice(df_routes_climbed, get_grades_instance())
+        else:
+            st.write("No routes introduced yet")
+
+        st.write(" ")
+        st.subheader('Details')
+        st.write(" ")
+
+        st.write(get_climber_instance().get_data()[['name', 'ascents', 'sector', 'height']])
+
+        st.write(" ")
+        st.subheader('Clusters')
+        st.write(" ")
+
+        c1, c2, c3 = st.columns([2, 20, 3])
+
+        with c2:
+            plot_figures()
+
+    st.markdown("""---""")
+
+
+# ----------------------- Reset -----------------------------------------
+def reset():
+    if st.button('Reset'):
+        st.session_state.key += 1
+        st.legacy_caching.clear_cache()
+
+
 # ----------------------- Gifs -----------------------------------------
+def load_lottieurl(url):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
 
 
 escaladora = load_lottieurl('https://assets5.lottiefiles.com/packages/lf20_12cye8ob.json')
