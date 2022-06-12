@@ -18,7 +18,7 @@ def get_grades_instance():
 
 @st.cache(allow_output_mutation=True)
 def get_location_instance():
-    routes = pd.read_csv('../data/routes_rated.csv', low_memory=False, index_col=0)
+    routes = pd.read_csv('data/routes_rated.csv', low_memory=False, index_col=0)
     loc = Location(routes)
     print("Routes shape: ", loc.routes.shape)
     return loc
