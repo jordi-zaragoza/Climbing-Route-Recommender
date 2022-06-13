@@ -6,7 +6,11 @@ This repository recommends sports-climbing routes
 
 I created a route recommender based on the features of the routes. I took the databases scrapped from the website 8a.nu and cleaned them. After cleaning I used K-means modelling to cluster the data and get a table of clustered routes. With that information and the routes ratings I was able to build a recommender based on the user's input features and routes climbed.
 
-I also created an app using this recommender, I deployed it in Heroku (and AWS now using EC2), you can find it online on [this link](https://route-recommender-app-eu.herokuapp.com/)
+I also created an app using this recommender. I deployed it in:
+
+- Heroku, you can find it online on [this link](https://route-recommender-app-eu.herokuapp.com/)
+
+- AWS EC2 using docker, you can find it on [this link](http://35.180.46.248:8501/). As long as my EC2 instance is up.
 
 ![App_gif](img/app_gif.gif)
 
