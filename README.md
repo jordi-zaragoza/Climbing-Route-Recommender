@@ -10,7 +10,7 @@ I also created an app using this recommender. I deployed it in:
 
 - Heroku, you can find it online on [this link](https://route-recommender-app-eu.herokuapp.com/)
 
-- AWS EC2 using docker, you can find it on [this link](http://35.180.46.248:8501/). As long as my EC2 instance is up.
+- AWS EC2 using docker, you can find it on [this link](http://13.38.224.3:8501/). As long as my EC2 instance is up.
 
 ![App_gif](img/app_gif.gif)
 
