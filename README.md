@@ -8,11 +8,13 @@ I created a route recommender based on the features of the routes. I took the da
 
 I also created an app using this recommender. I deployed it in:
 
-- Heroku, you can find it online on [this link](https://route-recommender-app-eu.herokuapp.com/)
+- Heroku: 
+  - Deployed for free on Heroku platform. You can find it online on [this link](https://route-recommender-app-eu.herokuapp.com/)
 
-- AWS EC2 using docker, you can find it on [this link](http://13.38.224.3:8501/). As long as my EC2 instance is up.
-
-![App_gif](img/app_gif.gif)
+- AWS:  
+  - In this case I dockerized the app and connected to a MongoDB docker container in order to have data persistency. 
+  - Everything done inside an AWS EC2 instance. you can find it on [this link](http://13.38.224.3:8501/). As long as my EC2 instance is up.
+  ![App_gif](img/app_gif.gif) 
 
 ## Contents
 
