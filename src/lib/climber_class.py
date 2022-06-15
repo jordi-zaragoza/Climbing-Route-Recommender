@@ -150,7 +150,29 @@ class Climber:
 
     def get_routes_not_liked(self):
         return self.routes_liked
+        
+    def get_routes_indifferent(self):
+        return self.routes_indifferent
 
+    def get_cluster(self):
+        return self.cluster
+    
+    # ---------------- Setter ---------------
+    def set_routes_indifferent(self, routes_indifferent):
+        self.routes_indifferent = routes_indifferent
+        
+    def set_routes_liked(self, routes_liked):
+        self.routes_liked = routes_liked
+
+    def set_routes_not_liked(self, routes_liked):
+        self.routes_liked = routes_liked
+
+    def set_cluster(self, cluster):
+        self.cluster = cluster
+    
+    def set_id(self, climber_id):
+        self.climber_id = climber_id
+    
     # ---------------- Route recommender ---------- yes here it is ;)
 
     def recommender_filter(self, df, show=True):

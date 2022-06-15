@@ -3,9 +3,10 @@ import streamlit as st
 from lib.grades_class import Grades
 from lib.location_class import Location
 from lib.climber_class import Climber
+from lib.mongo_jor import load_climber, save_climber, delete_db
 import pandas as pd
 from bokeh.plotting import figure
-from bokeh.models import Panel, Tabs, HoverTool, Range1d
+from bokeh.models import Panel, Tabs, HoverTool
 from streamlit_lottie import st_lottie
 
 
@@ -26,7 +27,14 @@ def get_location_instance():
 
 @st.cache(allow_output_mutation=True)
 def get_climber_instance(cluster_init_value=None):
-    cl = Climber(cluster_init=cluster_init_value)
+    try:
+        cl = load_climber(0)
+        print("Climber loaded from mongo")
+
+    except:
+        cl = Climber(cluster_init=cluster_init_value)
+        print("Climber no mongo")
+
     return cl
 
 
@@ -105,6 +113,8 @@ def button_recommend(user_input):
                                               height=user_input.height,
                                               cluster_init=user_input.cluster_init_value)
 
+        save_climber(get_climber_instance())
+
 
 def cluster_selector(cols):
     cluster_init_key = cols[0].selectbox(label='What kind of routes do you prefer', options=cluster_list.values())
@@ -113,9 +123,12 @@ def cluster_selector(cols):
 
 def crags(country, cols, loc):
     options = loc.crags_in_country(country)
-    idx = 0
-    if len(options) > 109:
-        idx = 110
+
+    try:
+        idx = list(options).index(get_climber_instance().get_data().crag[0])
+
+    except:
+        idx = 0
 
     crag = cols[1].selectbox(
         label='Select crag',
@@ -125,10 +138,13 @@ def crags(country, cols, loc):
 
 
 def sectors(crag, cols, loc):
-    idx = 0
     options = loc.sectors_in_crag(crag)
-    if len(options) > 10:
-        idx = 5
+
+    try:
+        idx = list(options).index(get_climber_instance().get_data().sector[0])
+
+    except:
+        idx = 0
 
     sector = cols[2].selectbox(
         label='Select sector',
@@ -140,9 +156,11 @@ def sectors(crag, cols, loc):
 def location_selector():
     cols = st.columns(3)
 
+    idx = list(get_location_instance().all_countries()).index(get_climber_instance().get_data().country[0])
+
     country = cols[0].selectbox(label='Select the country',
-                                options=(get_location_instance().all_countries()),
-                                index=17)
+                                options=get_location_instance().all_countries(),
+                                index=idx)
     crag = crags(country, cols, get_location_instance())
     sector = sectors(crag, cols, get_location_instance())
     return [country, crag, sector]
@@ -154,15 +172,22 @@ def get_user_input():
     # ------ First line -------
     cols = st.columns(2)
     user_input.cluster_init_value = cluster_selector(cols)
-    user_input.height = cols[1].slider('Select your height (cm)', 150, 200, 175)
+    user_input.height = cols[1].slider('Select your height (cm)', 150, 200,
+                                       int(get_climber_instance().get_data().height[0]))
 
     # ------ Second line -------
     cols = st.columns(2)
+    try:
+        idx = get_grades_instance().get_grades_fra().index(get_climber_instance().get_data().grade_fra[0])
+    except:
+        idx = 0
+
     user_input.grade = cols[0].selectbox(label='Select your grade (fra)',
                                          options=(get_grades_instance().get_grades_fra()),
-                                         index=5)
+                                         index=idx)
 
-    user_input.grade_range = cols[1].slider('Grade range', 1, 10, 2) * 2
+    user_input.grade_range = cols[1].slider('Grade range', 1, 10,
+                                            int(get_climber_instance().get_data().grade_range[0]) * 2)
 
     # ------ Third line -------
     user_input.location = location_selector()
@@ -212,6 +237,7 @@ def recommendation():
             if st.button('Done'):
                 like_it(liked, route, get_climber_instance())
                 get_location_instance().remove_route(route.name_id.values[0])
+                save_climber(get_climber_instance())
                 routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
                     routes=get_location_instance().routes)
 
@@ -234,7 +260,7 @@ def recommendation():
                     st.write("Cannot find a route in this sector, crag recommendation")
 
     elif routes_crag_rec.shape[0] > 0:
-        print("crag")
+
         route = routes_crag_rec.head(1)
 
         c1, c2 = st.columns([4, 1])
@@ -246,6 +272,7 @@ def recommendation():
             if st.button('Done'):
                 like_it(liked, route, get_climber_instance())
                 get_location_instance().remove_route(route.name_id.values[0])
+                save_climber(get_climber_instance())
                 routes_country_rec, routes_crag_rec, routes_sector_rec = get_climber_instance().route_recommender(
                     routes=get_location_instance().routes)
 
@@ -416,6 +443,7 @@ def climber_info():
 # ----------------------- Reset -----------------------------------------
 def reset():
     if st.button('Reset'):
+        delete_db()
         st.session_state.key += 1
         st.legacy_caching.clear_cache()
 
